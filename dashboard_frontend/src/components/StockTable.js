@@ -39,6 +39,25 @@ export default function StockTable({ searchSymbol, onRowSelect, colors }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Helper for dynamic column widths based on header text length.
+  // Minimum width: 60px, Maximum: 180px, Base: 10px per character.
+  // For very short headers, use a floor. For very long, use a ceiling.
+  function getWidthForHeader(label) {
+    const charCount = String(label).length;
+    if (charCount < 7) return 68;          // min width
+    if (charCount > 15) return 152;        // ceiling for very long labels
+    return Math.round(10 + charCount * 8.2); // base width per char
+  }
+
+  // Precompute column width style objects for columns (symbol, disposition, params)
+  const symbolColWidth = { minWidth: getWidthForHeader('Symbol'), width: getWidthForHeader('Symbol') };
+  const dispositionColWidth = { minWidth: getWidthForHeader('Disposition'), width: getWidthForHeader('Disposition'), maxWidth: 160 };
+  const paramColWidths = parameterDefs.map(pd => ({
+      minWidth: getWidthForHeader(pd.label),
+      width: getWidthForHeader(pd.label),
+      maxWidth: 180
+  }));
+
   // Fetch a single stock upon change
   useEffect(() => {
     let active = true;
@@ -312,17 +331,13 @@ export default function StockTable({ searchSymbol, onRowSelect, colors }) {
                 }}
               >
                 <colgroup>
-                  <col className="stock-col-symbol" style={{ minWidth: 60, width: '11.7%' }} />
-                  <col className="stock-col-disposition" style={{ minWidth: 85, maxWidth: 156, width: '15.6%' }} />
+                  <col className="stock-col-symbol" style={symbolColWidth} />
+                  <col className="stock-col-disposition" style={dispositionColWidth} />
                   {parameterDefs.map((pd, idx) => (
                     <col
                       key={pd.key}
                       className={`stock-col-param stock-col-param-${idx}`}
-                      style={{
-                        minWidth: 72,
-                        maxWidth: 156,
-                        width: '9.36%'
-                      }}
+                      style={paramColWidths[idx]}
                     />
                   ))}
                 </colgroup>
@@ -333,6 +348,7 @@ export default function StockTable({ searchSymbol, onRowSelect, colors }) {
                       scope="col"
                       tabIndex={0}
                       aria-label="Stock Symbol"
+                      style={symbolColWidth}
                     >
                       Symbol
                     </th>
@@ -341,7 +357,7 @@ export default function StockTable({ searchSymbol, onRowSelect, colors }) {
                       scope="col"
                       tabIndex={0}
                       aria-label="Disposition"
-                      style={{ textAlign: 'center'}}
+                      style={{ ...dispositionColWidth, textAlign: 'center'}}
                     >
                       Disposition
                     </th>
@@ -352,6 +368,7 @@ export default function StockTable({ searchSymbol, onRowSelect, colors }) {
                         scope="col"
                         tabIndex={0}
                         aria-label={pd.label}
+                        style={paramColWidths[idx]}
                       >
                         {pd.label}
                       </th>
@@ -372,6 +389,7 @@ export default function StockTable({ searchSymbol, onRowSelect, colors }) {
                     <td
                       className="stock-cell-body stock-col-symbol"
                       style={{
+                        ...symbolColWidth,
                         fontWeight: 700,
                         textAlign: 'left',
                         fontSize: '1.10rem',
@@ -387,13 +405,11 @@ export default function StockTable({ searchSymbol, onRowSelect, colors }) {
                     <td
                       className="stock-cell-body stock-col-disposition"
                       style={{
+                        ...dispositionColWidth,
                         color: dispositionColor(getDisposition(row)),
                         fontWeight: 800,
                         textAlign: 'center',
                         fontSize: '1.06rem',
-                        minWidth: 85,
-                        maxWidth: 156,
-                        width: '15.6%',
                         padding: '0.56rem 1.05rem',
                         background: 'inherit',
                         borderRight: '1.5px solid #bbb',
@@ -409,6 +425,7 @@ export default function StockTable({ searchSymbol, onRowSelect, colors }) {
                         key={pd.key}
                         className={`stock-cell-body stock-col-param stock-col-param-${idx} stock-col-param-numeric`}
                         style={{
+                          ...paramColWidths[idx],
                           textAlign: 'right',
                           fontFamily: 'monospace',
                           fontSize: '1.03rem',
@@ -417,9 +434,6 @@ export default function StockTable({ searchSymbol, onRowSelect, colors }) {
                           whiteSpace: 'nowrap',
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
-                          minWidth: 72,
-                          maxWidth: 156,
-                          width: '9.36%',
                           padding: '0.56rem 0.75rem',
                           background: 'inherit',
                           borderRight: '1.5px solid #bbb',

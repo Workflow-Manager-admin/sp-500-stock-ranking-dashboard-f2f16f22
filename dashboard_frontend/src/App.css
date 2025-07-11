@@ -218,16 +218,20 @@
   border: 1.5px solid #bbb;
 }
 
+/* .stock-table-justified .stock-col-symbol,
+.stock-table-justified .stock-col-param,
+.stock-table-justified .stock-col-disposition {
+  width: auto !important;
+  min-width: unset !important;
+  max-width: unset !important;
+} */
+
 .stock-table-justified .stock-col-symbol {
-  width: 11.7%;
-  min-width: 60px;
+  /* No fixed width: now set dynamically via React inline style */
   text-align: left;
 }
 
 .stock-table-justified .stock-col-param {
-  width: 9.36%;
-  min-width: 72px;
-  max-width: 156px;
   text-align: right;
   border-right: 1.5px solid #bbb;
   border-left: 1.5px solid #bbb;
@@ -238,10 +242,16 @@
 }
 
 .stock-table-justified .stock-col-disposition {
-  width: 15.6%;
-  min-width: 85px;
-  max-width: 156px;
   text-align: center;
+}
+
+.stock-table-justified col,
+.stock-table-justified th,
+.stock-table-justified td {
+  /* Ensure min-width may be overridden by inline style */
+  min-width: 0;
+  width: auto;
+  max-width: 220px;
 }
 
 /* Header cells: bolder, larger, clearer */
