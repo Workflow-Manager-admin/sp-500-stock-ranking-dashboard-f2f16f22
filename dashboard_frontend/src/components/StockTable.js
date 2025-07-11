@@ -225,11 +225,20 @@ export default function StockTable({ searchSymbol, onRowSelect, colors }) {
                 }}
               >
                 <colgroup>
-                  <col className="stock-col-symbol" />
+                  {/* 30% increased widths handled via CSS, but can put min/max inline as well if needed */}
+                  <col className="stock-col-symbol" style={{ minWidth: 60, width: '11.7%' }} />
                   {parameterDefs.map((pd, idx) => (
-                    <col key={pd.key} className={`stock-col-param stock-col-param-${idx}`} />
+                    <col
+                      key={pd.key}
+                      className={`stock-col-param stock-col-param-${idx}`}
+                      style={{
+                        minWidth: 72,
+                        maxWidth: 156,
+                        width: '9.36%'
+                      }}
+                    />
                   ))}
-                  <col className="stock-col-disposition" />
+                  <col className="stock-col-disposition" style={{ minWidth: 85, maxWidth: 156, width: '15.6%' }} />
                 </colgroup>
                 <thead>
                   <tr className="stock-row-header">
@@ -272,7 +281,10 @@ export default function StockTable({ searchSymbol, onRowSelect, colors }) {
                           letterSpacing: '-0.01em',
                           whiteSpace: 'nowrap',
                           overflow: 'hidden',
-                          textOverflow: 'ellipsis'
+                          textOverflow: 'ellipsis',
+                          minWidth: 72,
+                          maxWidth: 156,
+                          width: '9.36%'
                         }}
                         title={(row[pd.key] !== undefined && row[pd.key] !== null) ? String(row[pd.key]) : '-'}
                       >
@@ -284,7 +296,10 @@ export default function StockTable({ searchSymbol, onRowSelect, colors }) {
                       style={{
                         color: dispositionColor(getDisposition(row)),
                         fontWeight: 700,
-                        textAlign: 'center'
+                        textAlign: 'center',
+                        minWidth: 85,
+                        maxWidth: 156,
+                        width: '15.6%'
                       }}
                     >
                       {getDisposition(row)}

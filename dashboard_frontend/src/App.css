@@ -213,23 +213,23 @@
 }
 
 .stock-table-justified .stock-col-symbol {
-  width: 9%;
-  min-width: 46px;
+  width: 11.7%;
+  min-width: 60px;
   text-align: left;
 }
 
 .stock-table-justified .stock-col-param {
-  /* 10 parameter columns, share ~72% of width (each 7.2%), responsive flexing */
-  width: 7.2%;
-  min-width: 55px;
-  max-width: 120px;
+  /* 10 parameter columns, share ~93.6% of width (each 9.36%), responsive flexing */
+  width: 9.36%;
+  min-width: 72px;
+  max-width: 156px;
   text-align: center;
 }
 
 .stock-table-justified .stock-col-disposition {
-  width: 12%;
-  min-width: 65px;
-  max-width: 120px;
+  width: 15.6%;
+  min-width: 85px;
+  max-width: 156px;
   text-align: center;
 }
 
