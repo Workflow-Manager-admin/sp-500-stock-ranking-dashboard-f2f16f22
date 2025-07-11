@@ -94,10 +94,38 @@ export default function StockTable({ searchSymbol, onRowSelect, colors }) {
   };
 
   // Disposition calculation (Buy/Hold/Sell)
+  /**
+   * Compute disposition for a stock row using the agreed scoring formula:
+   * - Score 1-3 for each of the four metrics: P/E Ratio (lower=better), Beta (lower=better), Profit Margin (higher=better), EPS (higher=better).
+   * - Buy: score 10-12, Hold: score 7-9, Sell: score 4-6.
+   * Implements exact thresholds; missing data (null/undefined/"-") yields lowest score for that metric.
+   */
+  // PUBLIC_INTERFACE
   function getDisposition(row) {
-    if (row.peRatio < 18 && row.profitMargin > 0.12 && row.beta < 1.1) return 'Buy';
-    if (row.peRatio > 30 || row.beta > 1.4 || row.profitMargin < 0.07) return 'Sell';
-    return 'Hold';
+    // Helper: convert to number; use default if missing/invalid
+    function safeNum(v, fallback) { return (typeof v === 'number' && !isNaN(v)) ? v : ((v !== undefined && v !== null && v !== '-') ? +v : fallback); }
+
+    // P/E Ratio: [<16:3] [16-25:2] [>25:1]
+    let peVal = safeNum(row.peRatio, null);
+    let peScore = peVal === null ? 1 : (peVal < 16 ? 3 : (peVal <= 25 ? 2 : 1));
+
+    // Beta: [<1.0:3] [1.0-1.25:2] [>1.25:1]
+    let betaVal = safeNum(row.beta, null);
+    let betaScore = betaVal === null ? 1 : (betaVal < 1.0 ? 3 : (betaVal <= 1.25 ? 2 : 1));
+
+    // Profit Margin: [>0.15:3] [0.09-0.15:2] [<=0.09:1]
+    let pmVal = safeNum(row.profitMargin, null);
+    let pmScore = pmVal === null ? 1 : (pmVal > 0.15 ? 3 : (pmVal > 0.09 ? 2 : 1));
+
+    // EPS: [>6:3] [3-6:2] [<3:1]
+    let epsVal = safeNum(row.eps, null);
+    let epsScore = epsVal === null ? 1 : (epsVal > 6 ? 3 : (epsVal >= 3 ? 2 : 1));
+
+    let dispositionScore = peScore + betaScore + pmScore + epsScore;
+
+    if (dispositionScore >= 10) return 'Buy';
+    if (dispositionScore >= 7) return 'Hold';
+    return 'Sell';
   }
 
   // Visuals
