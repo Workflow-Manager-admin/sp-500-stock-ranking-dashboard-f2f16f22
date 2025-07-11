@@ -45,7 +45,7 @@ export default function SearchBar({ defaultValue, onSearch, accent }) {
         }}
         type="text"
         value={value}
-        placeholder="Enter ticker or part of name (leave blank to list all)"
+        placeholder="Enter any US stock ticker (e.g. AAPL)"
         onChange={e => setValue(e.target.value.toUpperCase())}
         maxLength={10}
         autoFocus
