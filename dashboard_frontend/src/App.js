@@ -5,47 +5,64 @@ import SearchBar from './components/SearchBar';
 import StockTable from './components/StockTable';
 import StockDetailsModal from './components/StockDetailsModal';
 import Footer from './components/Footer';
+import { FINNHUB_ERROR_TYPES, diagnoseFinnhubError } from './finnhubApi';
 
 // Finnhub status checking utility
 const FINNHUB_API_KEY = 'c50qf2iad3ifvojmvdpg'; // Use the same demo key for ping
 const FINNHUB_PING_URL = `https://finnhub.io/api/v1/quote?symbol=AAPL&token=${FINNHUB_API_KEY}`;
 
-// Connection states: "connected", "disconnected", "connecting"
-function useFinnhubConnectionStatus(pingIntervalMs = 15000) {
+// Enhanced: Connection state with diagnosis info
+function useFinnhubConnectionDiagnosis(pingIntervalMs = 15000) {
   const [status, setStatus] = useState('connecting'); // 'connected', 'disconnected', 'connecting'
+  const [errorCategory, setErrorCategory] = useState(null);
+  const [errorDetail, setErrorDetail] = useState(null);
   const intervalRef = useRef(null);
 
   useEffect(() => {
     let canceled = false;
     async function check() {
       setStatus('connecting');
+      setErrorCategory(null);
+      setErrorDetail(null);
+      let resp = undefined;
       try {
-        const resp = await fetch(FINNHUB_PING_URL);
+        resp = await fetch(FINNHUB_PING_URL);
         if (resp.ok) {
-          // Defensive: check this field is a number (API may rate-limit)
           const json = await resp.json();
-          // A good response gives an object; otherwise fetchStockPerformance will fail soon after
-          if ('c' in json) setStatus('connected');
-          else setStatus('disconnected');
+          if ('c' in json) {
+            setStatus('connected');
+            setErrorCategory(null);
+            setErrorDetail(null);
+          } else {
+            // Unexpected body structure
+            setStatus('disconnected');
+            setErrorCategory(FINNHUB_ERROR_TYPES.OTHER);
+            setErrorDetail('Unexpected response from Finnhub');
+          }
         } else {
           setStatus('disconnected');
+          // Diagnose error type from response
+          const diagnosis = await diagnoseFinnhubError(null, resp, FINNHUB_PING_URL);
+          setErrorCategory(diagnosis.type);
+          setErrorDetail(diagnosis.detail);
         }
-      } catch {
+      } catch (e) {
         setStatus('disconnected');
+        // Network or CORS errors
+        const diagnosis = await diagnoseFinnhubError(e, resp, FINNHUB_PING_URL);
+        setErrorCategory(diagnosis.type);
+        setErrorDetail(diagnosis.detail);
       }
     }
-    // Initial immediate call
     check();
-    // Then schedule repeated checks as a lightweight heartbeat
     intervalRef.current = setInterval(check, pingIntervalMs);
 
     return () => {
-      canceled = true;
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, [pingIntervalMs]);
 
-  return status;
+  return { status, errorCategory, errorDetail };
 }
 
 // PUBLIC_INTERFACE
@@ -57,7 +74,12 @@ function App() {
   const [theme, setTheme] = useState('light');
   const [selectedSymbol, setSelectedSymbol] = useState(null);
   const [searchSymbol, setSearchSymbol] = useState('AAPL');
-  const finnhubStatus = useFinnhubConnectionStatus();
+  // Enhanced: use diagnosis
+  const {
+    status: finnhubStatus,
+    errorCategory: finnhubErrorCategory,
+    errorDetail: finnhubErrorDetail,
+  } = useFinnhubConnectionDiagnosis();
 
   // Effect: update color scheme (minimalistic manual approach)
   useEffect(() => {
@@ -92,6 +114,8 @@ function App() {
         setTheme={setTheme}
         primary={primary}
         finnhubStatus={finnhubStatus}
+        finnhubErrorCategory={finnhubErrorCategory}
+        finnhubErrorDetail={finnhubErrorDetail}
       />
       <main className="dashboard-main" style={{minHeight: '80vh', padding: 0, margin: 0}}>
         <div className="dashboard-controls">
