@@ -210,10 +210,12 @@
 .stock-table-justified {
   width: 100%;
   table-layout: fixed;
-  border-collapse: separate;
+  border-collapse: collapse;
   border-spacing: 0;
   background: var(--bg-secondary);
   font-family: inherit;
+  box-shadow: 0 2px 14px #0001;
+  border: 1.5px solid #bbb;
 }
 
 .stock-table-justified .stock-col-symbol {
@@ -223,12 +225,12 @@
 }
 
 .stock-table-justified .stock-col-param {
-  /* 10 parameter columns, share ~93.6% of width (each 9.36%), responsive flexing */
   width: 9.36%;
   min-width: 72px;
   max-width: 156px;
-  /* Numbers are right-aligned in body, centered in header (see .stock-col-param-numeric) */
   text-align: right;
+  border-right: 1.5px solid #bbb;
+  border-left: 1.5px solid #bbb;
 }
 
 .stock-table-justified .stock-col-param-numeric {
@@ -249,10 +251,13 @@
   letter-spacing: 0.02em;
   font-size: 1.13rem;
   background: linear-gradient(90deg, var(--bg-secondary) 90%, #f3f5fb 100%);
-  border-bottom: 2.5px solid var(--border-color);
+  border-bottom: 2.5px solid #bbb;
+  border-top: 2.5px solid #bbb;
+  border-left: 1.5px solid #bbb;
+  border-right: 1.5px solid #bbb;
+  /* Explicit border for Excel-like effect */
   border-top-left-radius: 6px;
   border-top-right-radius: 6px;
-  /* padding improved for touch and spacing */
   padding: 0.67rem 0.75rem 0.56rem 0.75rem;
   text-align: left;
 }
@@ -271,6 +276,9 @@
 
 .stock-table-justified .stock-col-disposition .stock-cell-header {
   text-align: center;
+  border-right: 1.5px solid #bbb;
+  border-left: 1.5px solid #bbb;
+  background: #f3f3f7;
 }
 
 .stock-table-justified .stock-cell-header:focus,
@@ -285,11 +293,13 @@
   color: var(--text-primary);
   font-size: 1.02rem;
   padding: 0.56rem 0.75rem;
-  border-bottom: 1.5px solid #e8e8e8;
+  border-bottom: 1.5px solid #bbb;
+  border-top: 1.5px solid #bbb;
+  border-right: 1.5px solid #bbb;
+  border-left: 1.5px solid #bbb;
   vertical-align: middle;
   overflow: hidden;
   text-overflow: ellipsis;
-  /* Reset border radius for cells except first/last */
   border-radius: 0;
 }
 
@@ -302,9 +312,10 @@
 
 .stock-table-justified td.stock-col-disposition {
   font-weight: 800;
-  border-left: 2px solid var(--border-color);
-  background: inherit;
+  background: #f3f3f7;
   font-size: 1.07rem;
+  border-right: 1.5px solid #bbb;
+  border-left: 1.5px solid #bbb;
 }
 
 /* Alternating row backgrounds for readability (zebra striping) */

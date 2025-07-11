@@ -13,6 +13,16 @@ const parameterDefs = [
   { key: 'debtToEquity', label: 'Debt/Equity' },
   { key: 'freeCashFlowYield', label: 'FCF Yield' }
 ];
+// For desktop table rendering: Disposition should follow symbol before all parameters
+const orderedColumns = [
+  { key: 'symbol', label: 'Symbol', className: 'stock-col-symbol' },
+  { key: 'disposition', label: 'Disposition', className: 'stock-col-disposition' },
+  ...parameterDefs.map((pd, idx) => ({
+    ...pd,
+    className: `stock-col-param stock-col-param-${idx}`,
+    isParam: true
+  })),
+];
 
 // PUBLIC_INTERFACE
 /**
@@ -225,8 +235,8 @@ export default function StockTable({ searchSymbol, onRowSelect, colors }) {
                 }}
               >
                 <colgroup>
-                  {/* 30% increased widths handled via CSS, but can put min/max inline as well if needed */}
                   <col className="stock-col-symbol" style={{ minWidth: 60, width: '11.7%' }} />
+                  <col className="stock-col-disposition" style={{ minWidth: 85, maxWidth: 156, width: '15.6%' }} />
                   {parameterDefs.map((pd, idx) => (
                     <col
                       key={pd.key}
@@ -238,7 +248,6 @@ export default function StockTable({ searchSymbol, onRowSelect, colors }) {
                       }}
                     />
                   ))}
-                  <col className="stock-col-disposition" style={{ minWidth: 85, maxWidth: 156, width: '15.6%' }} />
                 </colgroup>
                 <thead>
                   <tr className="stock-row-header">
@@ -249,6 +258,15 @@ export default function StockTable({ searchSymbol, onRowSelect, colors }) {
                       aria-label="Stock Symbol"
                     >
                       Symbol
+                    </th>
+                    <th
+                      className="stock-cell-header stock-col-disposition"
+                      scope="col"
+                      tabIndex={0}
+                      aria-label="Disposition"
+                      style={{ textAlign: 'center'}}
+                    >
+                      Disposition
                     </th>
                     {parameterDefs.map((pd, idx) => (
                       <th
@@ -261,14 +279,6 @@ export default function StockTable({ searchSymbol, onRowSelect, colors }) {
                         {pd.label}
                       </th>
                     ))}
-                    <th
-                      className="stock-cell-header stock-col-disposition"
-                      scope="col"
-                      tabIndex={0}
-                      aria-label="Disposition"
-                    >
-                      Disposition
-                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -291,16 +301,37 @@ export default function StockTable({ searchSymbol, onRowSelect, colors }) {
                         letterSpacing: '-0.02em',
                         padding: '0.56rem 1.05rem',
                         background: 'inherit',
+                        borderRight: '1.5px solid #bbb',
+                        borderLeft: '1.5px solid #bbb'
                       }}
                     >
                       {row.symbol}
+                    </td>
+                    <td
+                      className="stock-cell-body stock-col-disposition"
+                      style={{
+                        color: dispositionColor(getDisposition(row)),
+                        fontWeight: 800,
+                        textAlign: 'center',
+                        fontSize: '1.06rem',
+                        minWidth: 85,
+                        maxWidth: 156,
+                        width: '15.6%',
+                        padding: '0.56rem 1.05rem',
+                        background: 'inherit',
+                        borderRight: '1.5px solid #bbb',
+                        borderLeft: '1.5px solid #bbb',
+                        backgroundColor: '#f3f3f7'
+                      }}
+                      aria-label="Stock Disposition"
+                    >
+                      {getDisposition(row)}
                     </td>
                     {parameterDefs.map((pd, idx) => (
                       <td
                         key={pd.key}
                         className={`stock-cell-body stock-col-param stock-col-param-${idx} stock-col-param-numeric`}
                         style={{
-                          // right-align numbers/text, for easier scan
                           textAlign: 'right',
                           fontFamily: 'monospace',
                           fontSize: '1.03rem',
@@ -314,6 +345,8 @@ export default function StockTable({ searchSymbol, onRowSelect, colors }) {
                           width: '9.36%',
                           padding: '0.56rem 0.75rem',
                           background: 'inherit',
+                          borderRight: '1.5px solid #bbb',
+                          borderLeft: '1.5px solid #bbb'
                         }}
                         title={(row[pd.key] !== undefined && row[pd.key] !== null) ? String(row[pd.key]) : '-'}
                         aria-label={pd.label}
@@ -321,24 +354,6 @@ export default function StockTable({ searchSymbol, onRowSelect, colors }) {
                         {row[pd.key] !== undefined && row[pd.key] !== null ? row[pd.key] : '-'}
                       </td>
                     ))}
-                    <td
-                      className="stock-cell-body stock-col-disposition"
-                      style={{
-                        color: dispositionColor(getDisposition(row)),
-                        fontWeight: 800,
-                        textAlign: 'center',
-                        fontSize: '1.06rem',
-                        minWidth: 85,
-                        maxWidth: 156,
-                        width: '15.6%',
-                        padding: '0.56rem 1.05rem',
-                        background: 'inherit',
-                        borderLeft: '2px solid var(--border-color)'
-                      }}
-                      aria-label="Stock Disposition"
-                    >
-                      {getDisposition(row)}
-                    </td>
                   </tr>
                 </tbody>
               </table>
