@@ -1,0 +1,4 @@
+{
+    "command": "npm install && npx tsc --noEmit && npm test -- --ci",
+    "working_directory": "/home/kavia/workspace/code-generation/sp-500-stock-ranking-dashboard-f2f16f22/dashboard_frontend"
+}
