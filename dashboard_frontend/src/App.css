@@ -206,10 +206,14 @@
    (works with .stock-table-justified)
    --------------------------------------- */
 
+/* ============ ENHANCED STOCK TABLE STYLES ============ */
 .stock-table-justified {
   width: 100%;
   table-layout: fixed;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--bg-secondary);
+  font-family: inherit;
 }
 
 .stock-table-justified .stock-col-symbol {
@@ -223,7 +227,12 @@
   width: 9.36%;
   min-width: 72px;
   max-width: 156px;
-  text-align: center;
+  /* Numbers are right-aligned in body, centered in header (see .stock-col-param-numeric) */
+  text-align: right;
+}
+
+.stock-table-justified .stock-col-param-numeric {
+  text-align: right !important;
 }
 
 .stock-table-justified .stock-col-disposition {
@@ -233,35 +242,80 @@
   text-align: center;
 }
 
-/* Header cells: bold and easier to read */
+/* Header cells: bolder, larger, clearer */
 .stock-table-justified .stock-cell-header {
-  font-weight: 600;
-  background: var(--bg-secondary);
-  padding: 0.42rem 0.6rem;
-  vertical-align: middle;
-  border-bottom: 1.5px solid var(--border-color);
-  font-size: 1.01rem;
-  letter-spacing: -0.01em;
+  font-weight: 800;
+  color: #102B56;
+  letter-spacing: 0.02em;
+  font-size: 1.13rem;
+  background: linear-gradient(90deg, var(--bg-secondary) 90%, #f3f5fb 100%);
+  border-bottom: 2.5px solid var(--border-color);
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  /* padding improved for touch and spacing */
+  padding: 0.67rem 0.75rem 0.56rem 0.75rem;
+  text-align: left;
 }
 
+.stock-table-justified .stock-col-param .stock-cell-header-param,
 .stock-table-justified .stock-cell-header-param {
-  padding: 0.40rem 0.3rem;
+  /* Header for parameter columns */
+  text-align: right;
+  padding-left: 0.3rem;
+  padding-right: 0.3rem;
+}
+
+.stock-table-justified .stock-col-param .stock-cell-header-param {
+  text-align: right !important;
+}
+
+.stock-table-justified .stock-col-disposition .stock-cell-header {
+  text-align: center;
+}
+
+.stock-table-justified .stock-cell-header:focus,
+.stock-table-justified .stock-cell-header:active {
+  outline: 2px solid #1a73e8;
+  outline-offset: 1px;
 }
 
 /* Body cells */
 .stock-table-justified .stock-cell-body {
   background: var(--bg-primary);
-  padding: 0.33rem 0.26rem;
-  border-bottom: 1px solid #eee;
+  color: var(--text-primary);
+  font-size: 1.02rem;
+  padding: 0.56rem 0.75rem;
+  border-bottom: 1.5px solid #e8e8e8;
+  vertical-align: middle;
   overflow: hidden;
   text-overflow: ellipsis;
+  /* Reset border radius for cells except first/last */
+  border-radius: 0;
 }
 
-.stock-table-justified .stock-col-disposition {
+.stock-table-justified td.stock-col-symbol {
   font-weight: 700;
+  letter-spacing: -0.01em;
+  font-size: 1.11rem;
+  background: inherit;
 }
 
-/* Row hover/focus: use distinct color */
+.stock-table-justified td.stock-col-disposition {
+  font-weight: 800;
+  border-left: 2px solid var(--border-color);
+  background: inherit;
+  font-size: 1.07rem;
+}
+
+/* Alternating row backgrounds for readability (zebra striping) */
+.stock-table-justified tbody tr:nth-child(even) .stock-cell-body {
+  background: #f7fafd;
+}
+.stock-table-justified tbody tr:nth-child(odd) .stock-cell-body {
+  background: var(--bg-primary);
+}
+
+/* Row focus/hover - clear visible highlight */
 .stock-table-justified .hoverable-row:hover,
 .stock-table-justified .hoverable-row:focus,
 .stock-table-justified .stock-row-body:hover,

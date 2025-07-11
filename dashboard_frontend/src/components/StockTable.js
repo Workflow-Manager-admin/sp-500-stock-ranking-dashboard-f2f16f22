@@ -242,16 +242,33 @@ export default function StockTable({ searchSymbol, onRowSelect, colors }) {
                 </colgroup>
                 <thead>
                   <tr className="stock-row-header">
-                    <th className="stock-cell-header stock-col-symbol">Symbol</th>
+                    <th
+                      className="stock-cell-header stock-col-symbol"
+                      scope="col"
+                      tabIndex={0}
+                      aria-label="Stock Symbol"
+                    >
+                      Symbol
+                    </th>
                     {parameterDefs.map((pd, idx) => (
                       <th
                         className={`stock-cell-header stock-cell-header-param stock-col-param stock-col-param-${idx}`}
                         key={pd.key}
+                        scope="col"
+                        tabIndex={0}
+                        aria-label={pd.label}
                       >
                         {pd.label}
                       </th>
                     ))}
-                    <th className="stock-cell-header stock-col-disposition">Disposition</th>
+                    <th
+                      className="stock-cell-header stock-col-disposition"
+                      scope="col"
+                      tabIndex={0}
+                      aria-label="Disposition"
+                    >
+                      Disposition
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -260,33 +277,46 @@ export default function StockTable({ searchSymbol, onRowSelect, colors }) {
                     tabIndex={0}
                     style={{
                       cursor: 'pointer',
-                      fontSize: '0.99rem',
                       fontWeight: 500,
-                      boxSizing: 'border-box'
+                      boxSizing: 'border-box',
                     }}
                     onClick={() => onRowSelect(row.symbol)}
                   >
-                    <td className="stock-cell-body stock-col-symbol" style={{
-                      fontWeight: 600,
-                      textAlign: 'left',
-                    }}>{row.symbol}</td>
+                    <td
+                      className="stock-cell-body stock-col-symbol"
+                      style={{
+                        fontWeight: 700,
+                        textAlign: 'left',
+                        fontSize: '1.10rem',
+                        letterSpacing: '-0.02em',
+                        padding: '0.56rem 1.05rem',
+                        background: 'inherit',
+                      }}
+                    >
+                      {row.symbol}
+                    </td>
                     {parameterDefs.map((pd, idx) => (
                       <td
                         key={pd.key}
-                        className={`stock-cell-body stock-col-param stock-col-param-${idx}`}
+                        className={`stock-cell-body stock-col-param stock-col-param-${idx} stock-col-param-numeric`}
                         style={{
-                          textAlign: 'center',
+                          // right-align numbers/text, for easier scan
+                          textAlign: 'right',
                           fontFamily: 'monospace',
-                          fontSize: '0.98rem',
+                          fontSize: '1.03rem',
+                          fontWeight: 500,
                           letterSpacing: '-0.01em',
                           whiteSpace: 'nowrap',
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
                           minWidth: 72,
                           maxWidth: 156,
-                          width: '9.36%'
+                          width: '9.36%',
+                          padding: '0.56rem 0.75rem',
+                          background: 'inherit',
                         }}
                         title={(row[pd.key] !== undefined && row[pd.key] !== null) ? String(row[pd.key]) : '-'}
+                        aria-label={pd.label}
                       >
                         {row[pd.key] !== undefined && row[pd.key] !== null ? row[pd.key] : '-'}
                       </td>
@@ -295,12 +325,17 @@ export default function StockTable({ searchSymbol, onRowSelect, colors }) {
                       className="stock-cell-body stock-col-disposition"
                       style={{
                         color: dispositionColor(getDisposition(row)),
-                        fontWeight: 700,
+                        fontWeight: 800,
                         textAlign: 'center',
+                        fontSize: '1.06rem',
                         minWidth: 85,
                         maxWidth: 156,
-                        width: '15.6%'
+                        width: '15.6%',
+                        padding: '0.56rem 1.05rem',
+                        background: 'inherit',
+                        borderLeft: '2px solid var(--border-color)'
                       }}
+                      aria-label="Stock Disposition"
                     >
                       {getDisposition(row)}
                     </td>
