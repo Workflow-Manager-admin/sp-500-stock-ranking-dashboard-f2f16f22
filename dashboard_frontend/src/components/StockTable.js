@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { fetchStockPerformance } from '../finnhubApi';
+import * as XLSX from 'xlsx';
 
 const parameterDefs = [
   { key: 'currentPrice', label: 'Price' },
@@ -172,6 +173,37 @@ export default function StockTable({ searchSymbol, onRowSelect, colors }) {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Export handler
+  function handleExport(format = 'xlsx') {
+    if (!row) return;
+    // columns should match table order: symbol, disposition, ...params
+    const data = [
+      {
+        Symbol: row.symbol,
+        Disposition: getDisposition(row),
+        ...parameterDefs.reduce((acc, pd) => {
+          acc[pd.label] = row[pd.key] !== undefined && row[pd.key] !== null ? row[pd.key] : '-';
+          return acc;
+        }, {})
+      }
+    ];
+    const ws = XLSX.utils.json_to_sheet(data, { header: ['Symbol', 'Disposition', ...parameterDefs.map(pd => pd.label)] });
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Stock Data");
+    if (format === "csv") {
+      const csv = XLSX.utils.sheet_to_csv(ws);
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `stock-data-${row.symbol}.csv`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 500);
+    } else {
+      XLSX.writeFile(wb, `stock-data-${row.symbol}.xlsx`);
+    }
+  }
+
   return (
     <div
       className="dashboard-table-wrap"
@@ -204,6 +236,51 @@ export default function StockTable({ searchSymbol, onRowSelect, colors }) {
             ? `Results for '${searchSymbol.trim().toUpperCase()}'`
             : `Enter a US stock ticker above to view its data.`}
         </span>
+        {/* Export buttons */}
+        {!loading && !error && row &&
+          <span style={{ float: 'right' }}>
+            <button
+              onClick={() => handleExport("xlsx")}
+              style={{
+                marginLeft: '1rem',
+                padding: '0.46rem 0.9rem',
+                background: colors.accent,
+                color: '#fff',
+                fontWeight: 600,
+                border: 'none',
+                borderRadius: 7,
+                cursor: 'pointer',
+                fontSize: '0.97rem',
+                transition: 'background 0.19s',
+                marginRight: 8
+              }}
+              aria-label='Export to Excel'
+              title='Download as Excel (.xlsx)'
+              tabIndex={0}
+            >
+              Export to Excel
+            </button>
+            <button
+              onClick={() => handleExport("csv")}
+              style={{
+                padding: '0.46rem 0.9rem',
+                background: colors.primary,
+                color: '#fff',
+                fontWeight: 600,
+                border: 'none',
+                borderRadius: 7,
+                cursor: 'pointer',
+                fontSize: '0.97rem',
+                transition: 'background 0.19s'
+              }}
+              aria-label='Export to CSV'
+              title='Download as CSV'
+              tabIndex={0}
+            >
+              Export to CSV
+            </button>
+          </span>
+        }
       </div>
       {loading && (<div style={{ padding: '2rem 0', color: colors.primary }}>Loading data…</div>)}
       {error && (
