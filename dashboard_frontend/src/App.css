@@ -1,12 +1,12 @@
 /* CSS Variables for Theme Management */
 :root {
   /* Light theme colors */
-  --bg-primary: #ffffff;
+  --bg-primary: #fff;
   --bg-secondary: #f8f9fa;
-  --text-primary: #282c34;
-  --text-secondary: #61dafb;
+  --text-primary: #222d3d;
+  --text-secondary: #91a1b4;
   --border-color: #e9ecef;
-  --button-bg: #007bff;
+  --button-bg: #1a73e8;
   --button-text: #ffffff;
 }
 
@@ -101,4 +101,62 @@
     padding: 8px 16px;
     font-size: 12px;
   }
+
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 0.9rem;
+    padding-left: 1.1rem !important;
+    padding-right: 1.1rem !important;
+  }
+  .dashboard-title {
+    font-size: 1.16rem !important;
+  }
+  .dashboard-table-wrap {
+    padding: 0.6rem 0 !important;
+  }
+  .dashboard-searchbar {
+    margin: 1rem auto 1rem auto !important;
+    max-width: 90vw !important;
+  }
+}
+
+.dashboard-header {
+  z-index: 25;
+}
+
+.dashboard-main {
+  min-height: 78vh;
+  background: var(--bg-primary);
+}
+
+.dashboard-table-wrap {
+  margin-top: 0;
+  background: var(--bg-secondary);
+}
+
+.dashboard-table-wrap table thead th,
+.dashboard-table-wrap table tbody td {
+  border-bottom: 1px solid #eee;
+}
+
+.dashboard-table-wrap table tr.hoverable-row:hover,
+.dashboard-table-wrap table tr.hoverable-row:focus {
+  background: #e8f5fe !important;
+}
+
+.dashboard-modal-overlay {
+  /* fade in animation for overlay */
+  animation: modal-fade-in 0.21s;
+}
+@keyframes modal-fade-in {
+  from { background: rgba(34,34,34,0.0);}
+  to   { background: rgba(34,34,34,0.23);}
+}
+.dashboard-modal {
+  animation: modal-pop 0.17s;
+}
+@keyframes modal-pop {
+  from { transform: scale(0.95); opacity: 0.7;}
+  to   { transform: scale(1.0); opacity: 1;}
 }
