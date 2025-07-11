@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 // PUBLIC_INTERFACE
 /**
  * SearchBar
- * Allows searching for a company ticker (initially AAPL only).
+ * Allows searching for a company ticker or filtering the table.
  * @param {string} defaultValue - The initial/placeholder value.
  * @param {function} onSearch - Callback when searching.
  * @param {string} accent - Accent color.
@@ -14,7 +14,8 @@ export default function SearchBar({ defaultValue, onSearch, accent }) {
   // PUBLIC_INTERFACE
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (value && typeof onSearch === 'function') onSearch(value);
+    // Pass empty string if nothing entered: shows all stocks.
+    if (typeof onSearch === 'function') onSearch(value?.trim() || '');
   };
 
   return (
@@ -44,9 +45,9 @@ export default function SearchBar({ defaultValue, onSearch, accent }) {
         }}
         type="text"
         value={value}
-        placeholder="Enter ticker (e.g., AAPL)"
+        placeholder="Enter ticker or part of name (leave blank to list all)"
         onChange={e => setValue(e.target.value.toUpperCase())}
-        maxLength={8}
+        maxLength={10}
         autoFocus
       />
       <button
