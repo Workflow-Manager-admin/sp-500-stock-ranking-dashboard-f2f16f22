@@ -133,6 +133,8 @@
 .dashboard-table-wrap {
   margin-top: 0;
   background: var(--bg-secondary);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .dashboard-table-wrap table thead th,
@@ -143,6 +145,67 @@
 .dashboard-table-wrap table tr.hoverable-row:hover,
 .dashboard-table-wrap table tr.hoverable-row:focus {
   background: #e8f5fe !important;
+}
+
+/* Mobile responsive: StockTable as card (no horizontal scroll, all data shown) */
+@media (max-width: 900px) {
+  .dashboard-table-wrap {
+    padding: 0.3rem 0rem 1.6rem 0rem !important;
+    min-width: 0;
+    max-width: 99vw;
+    border-radius: 12px;
+    background: var(--bg-secondary);
+    overflow-x: hidden !important;
+  }
+  .dashboard-table-wrap table,
+  .dashboard-table-wrap thead,
+  .dashboard-table-wrap tbody,
+  .dashboard-table-wrap th,
+  .dashboard-table-wrap td,
+  .dashboard-table-wrap tr {
+    display: none !important;
+  }
+
+  .dashboard-mobile-stock-card {
+    display: block !important;
+    /* handled with inline style to maximize flexibility */
+  }
+  .dashboard-table-info {
+    padding-left: 1.1em !important;
+    padding-right: 1.1em !important;
+    font-size: 1.02rem !important;
+  }
+}
+
+/* Desktop: shrink font/padding to avoid scroll on table, expand max container size */
+@media (min-width: 901px) {
+  .dashboard-table-wrap {
+    max-width: 900px !important;
+    min-width: 0;
+    overflow-x: visible;
+  }
+  .dashboard-table-wrap table {
+    font-size: 0.98rem;
+  }
+  .dashboard-table-wrap th,
+  .dashboard-table-wrap td {
+    padding: 0.3rem 0.15rem !important;
+    font-size: 0.97rem !important;
+    white-space: nowrap;
+    letter-spacing: -0.01em;
+  }
+  .dashboard-table-info {
+    font-size: 0.96rem;
+    padding-left: 1.7em !important;
+    padding-right: 1.7em !important;
+  }
+}
+
+/* Hide mobile card on desktop (ensure no DOM flicker with JS fallback) */
+@media (min-width: 901px) {
+  .dashboard-mobile-stock-card {
+    display: none !important;
+  }
 }
 
 .dashboard-modal-overlay {

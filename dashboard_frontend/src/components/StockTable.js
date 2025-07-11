@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { fetchStockPerformance } from '../finnhubApi';
 
-// 10 key performance parameters, can be expanded
 const parameterDefs = [
   { key: 'currentPrice', label: 'Price' },
   { key: 'peRatio', label: 'P/E Ratio' },
@@ -19,6 +18,7 @@ const parameterDefs = [
 /**
  * StockTable
  * Displays a single searched stock's info as a mini-table (rather than the full S&P 500 batch).
+ * Responsive: On desktop, displays as horizontal table; on mobile, stacks as a vertical card.
  * @param {string} searchSymbol - Ticker to fetch, e.g. 'AAPL'
  * @param {function} onRowSelect - Called with symbol when selecting a row
  * @param {object} colors - accent/primary/secondary for styling
@@ -88,53 +88,254 @@ export default function StockTable({ searchSymbol, onRowSelect, colors }) {
     'Sell': colors.secondary,
   }[d] || '#888');
 
+  // Responsive rendering helpers
+  function StockCardMobile({ row }) {
+    return (
+      <div
+        className="dashboard-mobile-stock-card"
+        style={{
+          borderRadius: 14,
+          border: `1.5px solid ${colors.accent}`,
+          background: 'var(--bg-primary)',
+          boxShadow: '0 1px 11px #0002',
+          padding: '1.1rem 1.1rem',
+          margin: '0.7rem 1.1rem',
+          fontSize: '1.08rem',
+          cursor: 'pointer', // Whole card clickable
+          transition: 'box-shadow 0.19s'
+        }}
+        tabIndex={0}
+        onClick={() => onRowSelect(row.symbol)}
+        onKeyDown={e => { if (["Enter", " "].includes(e.key)) onRowSelect(row.symbol); }}
+        aria-label={`Show details for ${row.symbol}`}
+      >
+        <div style={{ fontWeight: 700, color: colors.primary, fontSize: '1.2rem', marginBottom: 9 }}>
+          <span>{row.symbol}</span>
+          <span
+            style={{
+              float: 'right',
+              background: dispositionColor(getDisposition(row)),
+              color: '#fff',
+              fontWeight: 600,
+              padding: '0.13em 0.74em',
+              borderRadius: 14,
+              fontSize: '1.02rem'
+            }}
+            aria-label={`Disposition: ${getDisposition(row)}`}
+          >
+            {getDisposition(row)}
+          </span>
+        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem 0.6rem' }}>
+          {parameterDefs.map(pd => (
+            <div
+              key={pd.key}
+              style={{
+                flex: '1 1 48%',
+                minWidth: 120,
+                display: 'flex',
+                alignItems: 'center',
+                padding: '2px 0'
+              }}
+            >
+              <span style={{ color: colors.primary, minWidth: 99, fontSize: '1.05rem', fontWeight: 500 }}>
+                {pd.label}:
+              </span>
+              <span style={{ fontFamily: 'monospace', marginLeft: 4 }}>
+                {row[pd.key] !== undefined && row[pd.key] !== null ? row[pd.key] : '-'}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Determine if on mobile: match the media query for 900px or less (JS for SSR-safe, pure CSS for production)
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 900);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   return (
-    <div className="dashboard-table-wrap" style={{ maxWidth: 700, margin: '0 auto', background: 'var(--bg-secondary)', borderRadius: 11, boxShadow: '0 0 8px #0001', padding: '1.3rem 0', overflowX: 'auto' }}>
-      <div style={{ textAlign: 'left', padding: '0.8rem 1.6rem 0.2rem 1.6rem' }}>
-        <span style={{ fontWeight: 500, color: colors.primary, fontSize: '1.2rem' }}>
+    <div
+      className="dashboard-table-wrap"
+      style={{
+        maxWidth: 900,
+        margin: '0 auto',
+        background: 'var(--bg-secondary)',
+        borderRadius: 11,
+        boxShadow: '0 0 8px #0001',
+        padding: '0.8rem 0.25rem 1.6rem 0.25rem',
+        overflowX: 'hidden'
+      }}
+    >
+      <div
+        style={{
+          textAlign: 'left',
+          padding: isMobile
+            ? '0.85rem 1.1rem 0.5rem 1.1rem'
+            : '0.8rem 1.95rem 0.3rem 1.95rem'
+        }}
+      >
+        <span
+          style={{
+            fontWeight: 500,
+            color: colors.primary,
+            fontSize: isMobile ? '1.08rem' : '1.18rem'
+          }}
+        >
           {searchSymbol
             ? `Results for '${searchSymbol.trim().toUpperCase()}'`
             : `Enter a US stock ticker above to view its data.`}
         </span>
       </div>
-      {loading && (<div style={{padding: '2rem 0', color: colors.primary}}>Loading data…</div>)}
-      {error && (<div style={{ color: '#c00', background: '#ffeaea', padding: '1rem 1.5rem', borderRadius: '6px', margin: '1.3rem 2.1rem' }}>Error: {error}</div>)}
-      {!loading && !error && row &&
-        <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: '1.10rem', marginTop: 10 }}>
-          <thead>
-            <tr>
-              <th style={{ padding: '0.5rem 1.1rem', minWidth: 80 }}>Symbol</th>
-              {parameterDefs.map(pd => (
-                <th key={pd.key} style={{ padding: '0.5rem 0.7rem', minWidth: 90 }}>
-                  {pd.label}
-                </th>
-              ))}
-              <th style={{ padding: '0.5rem 1.1rem', minWidth: 100 }}>Disposition</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr className="hoverable-row" tabIndex={0} style={{ cursor: 'pointer' }} onClick={() => onRowSelect(row.symbol)}>
-              <td style={{ padding: '0.47rem 1.2rem', fontWeight: 600 }}>{row.symbol}</td>
-              {parameterDefs.map(pd => (
-                <td key={pd.key} style={{ padding: '0.47rem 0.7rem', textAlign: 'right', fontFamily: 'monospace' }}>
-                  {row[pd.key] !== undefined && row[pd.key] !== null ? row[pd.key] : '-'}
-                </td>
-              ))}
-              <td style={{ color: dispositionColor(getDisposition(row)), fontWeight: 700 }}>{getDisposition(row)}</td>
-            </tr>
-          </tbody>
-        </table>
-      }
+      {loading && (<div style={{ padding: '2rem 0', color: colors.primary }}>Loading data…</div>)}
+      {error && (
+        <div
+          style={{
+            color: '#c00',
+            background: '#ffeaea',
+            padding: '1rem 1.5rem',
+            borderRadius: '6px',
+            margin: '1.3rem 2.1rem'
+          }}
+        >
+          Error: {error}
+        </div>
+      )}
+      {!loading && !error && row && (
+        isMobile
+          ? <StockCardMobile row={row} />
+          : (
+            <div style={{ width: '100%', overflow: 'visible' }}>
+              <table
+                style={{
+                  borderCollapse: 'collapse',
+                  width: '100%',
+                  minWidth: 0,
+                  fontSize: '0.97rem',
+                  marginTop: 10,
+                  tableLayout: 'fixed'
+                }}
+              >
+                <colgroup>
+                  <col style={{ width: '9%' }} />
+                  {parameterDefs.map((pd, idx) => (
+                    <col key={pd.key} style={{ width: `${82/parameterDefs.length}%` }} />
+                  ))}
+                  <col style={{ width: '12%' }} />
+                </colgroup>
+                <thead>
+                  <tr style={{
+                    fontWeight: 600,
+                    fontSize: '1.00rem',
+                    background: 'var(--bg-secondary)',
+                  }}>
+                    <th style={{
+                      padding: '0.42rem 0.6rem',
+                      minWidth: 45,
+                      letterSpacing: '-0.01em',
+                      textAlign: 'left',
+                    }}>Symbol</th>
+                    {parameterDefs.map(pd => (
+                      <th
+                        key={pd.key}
+                        style={{
+                          padding: '0.40rem 0.3rem',
+                          minWidth: 62,
+                          fontSize: '0.96rem',
+                          textAlign: 'center'
+                        }}>
+                        {pd.label}
+                      </th>
+                    ))}
+                    <th style={{
+                      padding: '0.41rem 0.7rem',
+                      minWidth: 68,
+                      textAlign: 'center'
+                    }}>Disposition</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    className="hoverable-row"
+                    tabIndex={0}
+                    style={{
+                      cursor: 'pointer',
+                      fontSize: '0.99rem',
+                      fontWeight: 500,
+                      boxSizing: 'border-box'
+                    }}
+                    onClick={() => onRowSelect(row.symbol)}
+                  >
+                    <td style={{
+                      padding: '0.36rem 0.62rem',
+                      fontWeight: 600,
+                      textAlign: 'left',
+                    }}>{row.symbol}</td>
+                    {parameterDefs.map(pd => (
+                      <td
+                        key={pd.key}
+                        style={{
+                          padding: '0.34rem 0.25rem',
+                          textAlign: 'center',
+                          fontFamily: 'monospace',
+                          fontSize: '0.98rem',
+                          letterSpacing: '-0.01em',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis'
+                        }}
+                        title={(row[pd.key] !== undefined && row[pd.key] !== null) ? String(row[pd.key]) : '-'}
+                      >
+                        {row[pd.key] !== undefined && row[pd.key] !== null ? row[pd.key] : '-'}
+                      </td>
+                    ))}
+                    <td
+                      style={{
+                        color: dispositionColor(getDisposition(row)),
+                        fontWeight: 700,
+                        textAlign: 'center'
+                      }}
+                    >
+                      {getDisposition(row)}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          )
+      )}
       {!loading && !error && !row && (
-        <div style={{ padding: '1.6rem 0', color: 'var(--text-secondary)', textAlign: 'center', fontSize: '1.06rem' }}>
+        <div style={{
+          padding: '1.6rem 0',
+          color: 'var(--text-secondary)',
+          textAlign: 'center',
+          fontSize: '1.06rem'
+        }}>
           {searchSymbol
             ? <>No data found for "<b>{searchSymbol.trim().toUpperCase()}</b>". Please check if the ticker is valid.</>
             : <>Please enter a ticker (e.g., <i>AAPL</i>) above to search for a US stock.</>
           }
         </div>
       )}
-      <div className="dashboard-table-info" style={{ fontSize: '0.97rem', color: 'var(--text-secondary)', padding: '0.8rem 1.6rem 0 1.6rem' }}>
-        Click row for more company details. Results based on single-stock lookup.&nbsp;
+      <div
+        className="dashboard-table-info"
+        style={{
+          fontSize: '0.97rem',
+          color: 'var(--text-secondary)',
+          padding: isMobile
+            ? '0.75rem 1.1rem 0 1.1rem'
+            : '0.8rem 1.7rem 0 1.7rem'
+        }}
+      >
+        Click {isMobile ? "card" : "row"} for more company details. Results based on single-stock lookup.&nbsp;
         {searchSymbol && !loading && !error && row?.symbol && (
           <span>Disposition is based on P/E, Beta, Profit Margin, and EPS.</span>
         )}
