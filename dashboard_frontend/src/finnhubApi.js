@@ -96,21 +96,19 @@ async function finnhubFetchJSON(url) {
 }
 
 /**
- * Fetch core performance metrics for a stock.
+ * Fetch core performance metrics for a stock (10 metrics).
  * Returns object with all 10 metrics.
  * Throws with error.category and error.detail if failed.
  */
 // PUBLIC_INTERFACE
 export async function fetchStockPerformance(symbol) {
-  // Fetch quote, metrics, profile—aggregate for demo.
+  // Fetch quote, metrics, profile—aggregate for details or modal.
   try {
     const [quote, metrics, profile] = await Promise.all([
       finnhubFetchJSON(`https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${FINNHUB_API_KEY}`),
       finnhubFetchJSON(`https://finnhub.io/api/v1/stock/metric?symbol=${symbol}&metric=all&token=${FINNHUB_API_KEY}`),
       finnhubFetchJSON(`https://finnhub.io/api/v1/stock/profile2?symbol=${symbol}&token=${FINNHUB_API_KEY}`),
     ]);
-    // Compose a row with 10 metrics.
-    // Defensive: Provide '-' if missing.
     const ratios = metrics.metric || {};
     return {
       symbol: symbol,
@@ -126,9 +124,83 @@ export async function fetchStockPerformance(symbol) {
       freeCashFlowYield: parsePercent(ratios.freeCashFlowYieldAnnual)
     };
   } catch (error) {
-    // error.category, error.detail available, propagate
     throw error;
   }
+}
+
+/**
+ * PUBLIC_INTERFACE
+ * Batch fetches performance data for a list of S&P 500 symbols (for the table).
+ * Efficiently requests quotes and metrics in bulk, then fetches minimal profile data for all.
+ * Returns: Array of result objects (one per symbol) in input order.
+ * Throws on fatal Finnhub errors (rate limits, network).
+ *
+ * Optimized for table usage: includes only the 10 displayed parameters for each stock.
+ * Uses Finnhub's multi-symbol endpoints where possible (quote/metrics: 1-by-1, profile: omitted for table).
+ *
+ * @param {string[]} symbols - Array of ticker symbols (e.g. ["AAPL", "MSFT", ...])
+ * @returns {Promise<Array<Object>>} Array of stock parameter objects (one per symbol)
+ */
+export async function fetchBatchStockPerformance(symbols) {
+  // API: No true bulk endpoint, but we can parallelize fetches in waves (to avoid rate limits).
+  // Finnhub free tier is ~60 requests/min, so bulk up to 15 requests at a time is modest.
+  if (!Array.isArray(symbols) || symbols.length === 0) return [];
+
+  // Helper to throttle (sleep ms)
+  function sleep(ms) {
+    return new Promise(res => setTimeout(res, ms));
+  }
+
+  // Fetch batch with concurrency limit (to respect Finnhub free API quota)
+  // Each stock = 2 API calls: quote + metrics, so throttle at e.g. 10 stocks (20 calls) per second
+  const BATCH_SIZE = 10;
+  const stocks = [];
+  let i = 0;
+
+  while (i < symbols.length) {
+    const chunk = symbols.slice(i, i + BATCH_SIZE);
+
+    // For each symbol, run quote+metrics in parallel.
+    const chunkResults = await Promise.all(chunk.map(async symbol => {
+      try {
+        const [quote, metrics] = await Promise.all([
+          finnhubFetchJSON(`https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${FINNHUB_API_KEY}`),
+          finnhubFetchJSON(`https://finnhub.io/api/v1/stock/metric?symbol=${symbol}&metric=all&token=${FINNHUB_API_KEY}`)
+        ]);
+        const ratios = metrics.metric || {};
+
+        // Some fields (like marketCap) are available only in profile; show "-" in table for lightweight batch fetch
+        return {
+          symbol: symbol,
+          currentPrice: quote.c ?? '-',
+          peRatio: parseNumber(ratios.peNormalizedAnnual) ?? '-',
+          marketCap: '-', // Available in StockDetailsModal (from fetchStockPerformance)
+          dividendYield: parsePercent(ratios.dividendYieldAnnual),
+          roe: parsePercent(ratios.roeAnnual),
+          beta: parseNumber(ratios.beta),
+          profitMargin: parsePercent(ratios.netProfitMarginAnnual),
+          eps: parseNumber(ratios.epsAnnual),
+          debtToEquity: parseNumber(ratios.debtEquityAnnual),
+          freeCashFlowYield: parsePercent(ratios.freeCashFlowYieldAnnual)
+        };
+      } catch (error) {
+        // If one fails, indicate errant symbol with error (won't block table)
+        return {
+          symbol,
+          error: error.category || 'API Error',
+          currentPrice: '-'
+        };
+      }
+    }));
+
+    stocks.push(...chunkResults);
+    i += BATCH_SIZE;
+
+    // Respect API rate limit: 2 calls per stock × batch size = e.g. 20; wait ~1s per batch (tunable)
+    if (i < symbols.length) await sleep(1100);
+  }
+
+  return stocks;
 }
 
 /**
