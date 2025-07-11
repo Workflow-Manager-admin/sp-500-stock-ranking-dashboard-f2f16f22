@@ -66,7 +66,7 @@ export async function diagnoseFinnhubError(errorObj, resp, url) {
   return { type: FINNHUB_ERROR_TYPES.OTHER, detail: detail || (errorObj?.message || "Unknown error") };
 }
 
-const FINNHUB_API_KEY = 'c50qf2iad3ifvojmvdpg'; // DEMO PUBLIC (rate limited)—change for prod!
+const FINNHUB_API_KEY = 'd1oh9thr01quemd91de0d1oh9thr01quemd91deg'; // Updated API key
 
 // Internal fetch wrapper for diagnosis
 async function finnhubFetchJSON(url) {
