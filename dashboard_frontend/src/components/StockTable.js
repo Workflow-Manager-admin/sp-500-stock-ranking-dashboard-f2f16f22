@@ -215,56 +215,39 @@ export default function StockTable({ searchSymbol, onRowSelect, colors }) {
           : (
             <div style={{ width: '100%', overflow: 'visible' }}>
               <table
+                className="stock-table-justified"
                 style={{
                   borderCollapse: 'collapse',
                   width: '100%',
                   minWidth: 0,
                   fontSize: '0.97rem',
-                  marginTop: 10,
-                  tableLayout: 'fixed'
+                  marginTop: 10
                 }}
               >
                 <colgroup>
-                  <col style={{ width: '9%' }} />
+                  <col className="stock-col-symbol" />
                   {parameterDefs.map((pd, idx) => (
-                    <col key={pd.key} style={{ width: `${82/parameterDefs.length}%` }} />
+                    <col key={pd.key} className={`stock-col-param stock-col-param-${idx}`} />
                   ))}
-                  <col style={{ width: '12%' }} />
+                  <col className="stock-col-disposition" />
                 </colgroup>
                 <thead>
-                  <tr style={{
-                    fontWeight: 600,
-                    fontSize: '1.00rem',
-                    background: 'var(--bg-secondary)',
-                  }}>
-                    <th style={{
-                      padding: '0.42rem 0.6rem',
-                      minWidth: 45,
-                      letterSpacing: '-0.01em',
-                      textAlign: 'left',
-                    }}>Symbol</th>
-                    {parameterDefs.map(pd => (
+                  <tr className="stock-row-header">
+                    <th className="stock-cell-header stock-col-symbol">Symbol</th>
+                    {parameterDefs.map((pd, idx) => (
                       <th
+                        className={`stock-cell-header stock-cell-header-param stock-col-param stock-col-param-${idx}`}
                         key={pd.key}
-                        style={{
-                          padding: '0.40rem 0.3rem',
-                          minWidth: 62,
-                          fontSize: '0.96rem',
-                          textAlign: 'center'
-                        }}>
+                      >
                         {pd.label}
                       </th>
                     ))}
-                    <th style={{
-                      padding: '0.41rem 0.7rem',
-                      minWidth: 68,
-                      textAlign: 'center'
-                    }}>Disposition</th>
+                    <th className="stock-cell-header stock-col-disposition">Disposition</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr
-                    className="hoverable-row"
+                    className="hoverable-row stock-row-body"
                     tabIndex={0}
                     style={{
                       cursor: 'pointer',
@@ -274,16 +257,15 @@ export default function StockTable({ searchSymbol, onRowSelect, colors }) {
                     }}
                     onClick={() => onRowSelect(row.symbol)}
                   >
-                    <td style={{
-                      padding: '0.36rem 0.62rem',
+                    <td className="stock-cell-body stock-col-symbol" style={{
                       fontWeight: 600,
                       textAlign: 'left',
                     }}>{row.symbol}</td>
-                    {parameterDefs.map(pd => (
+                    {parameterDefs.map((pd, idx) => (
                       <td
                         key={pd.key}
+                        className={`stock-cell-body stock-col-param stock-col-param-${idx}`}
                         style={{
-                          padding: '0.34rem 0.25rem',
                           textAlign: 'center',
                           fontFamily: 'monospace',
                           fontSize: '0.98rem',
@@ -298,6 +280,7 @@ export default function StockTable({ searchSymbol, onRowSelect, colors }) {
                       </td>
                     ))}
                     <td
+                      className="stock-cell-body stock-col-disposition"
                       style={{
                         color: dispositionColor(getDisposition(row)),
                         fontWeight: 700,

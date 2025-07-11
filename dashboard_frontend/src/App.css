@@ -201,6 +201,84 @@
   }
 }
 
+/* ---------------------------------------
+   StockTable column width justification
+   (works with .stock-table-justified)
+   --------------------------------------- */
+
+.stock-table-justified {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.stock-table-justified .stock-col-symbol {
+  width: 9%;
+  min-width: 46px;
+  text-align: left;
+}
+
+.stock-table-justified .stock-col-param {
+  /* 10 parameter columns, share ~72% of width (each 7.2%), responsive flexing */
+  width: 7.2%;
+  min-width: 55px;
+  max-width: 120px;
+  text-align: center;
+}
+
+.stock-table-justified .stock-col-disposition {
+  width: 12%;
+  min-width: 65px;
+  max-width: 120px;
+  text-align: center;
+}
+
+/* Header cells: bold and easier to read */
+.stock-table-justified .stock-cell-header {
+  font-weight: 600;
+  background: var(--bg-secondary);
+  padding: 0.42rem 0.6rem;
+  vertical-align: middle;
+  border-bottom: 1.5px solid var(--border-color);
+  font-size: 1.01rem;
+  letter-spacing: -0.01em;
+}
+
+.stock-table-justified .stock-cell-header-param {
+  padding: 0.40rem 0.3rem;
+}
+
+/* Body cells */
+.stock-table-justified .stock-cell-body {
+  background: var(--bg-primary);
+  padding: 0.33rem 0.26rem;
+  border-bottom: 1px solid #eee;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stock-table-justified .stock-col-disposition {
+  font-weight: 700;
+}
+
+/* Row hover/focus: use distinct color */
+.stock-table-justified .hoverable-row:hover,
+.stock-table-justified .hoverable-row:focus,
+.stock-table-justified .stock-row-body:hover,
+.stock-table-justified .stock-row-body:focus {
+  background: #e8f5fe !important;
+}
+
+/* Make sure table scrolls horizontally if content overflows, only on small desktop */
+@media (max-width: 1100px) and (min-width: 901px) {
+  .dashboard-table-wrap {
+    overflow-x: auto !important;
+  }
+  .stock-table-justified {
+    min-width: 700px;
+  }
+}
+
 /* Hide mobile card on desktop (ensure no DOM flicker with JS fallback) */
 @media (min-width: 901px) {
   .dashboard-mobile-stock-card {
