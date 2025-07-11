@@ -75,6 +75,7 @@ function App() {
   const [selectedSymbol, setSelectedSymbol] = useState(null);
   const [searchSymbol, setSearchSymbol] = useState('AAPL');
   // Enhanced: use diagnosis
+  // If any remnant usage of useFinnhubConnectionStatus exists, replace it with useFinnhubConnectionDiagnosis
   const {
     status: finnhubStatus,
     errorCategory: finnhubErrorCategory,
