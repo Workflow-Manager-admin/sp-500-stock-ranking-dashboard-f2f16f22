@@ -16,6 +16,8 @@ function App() {
     setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
   };
 
+  // Placeholder dashboard: No default stock is selected.
+  // Displays empty dashboard or instruction to select/search a stock.
   return (
     <div className="App">
       <header className="App-header">
@@ -27,8 +29,12 @@ function App() {
           {theme === 'light' ? '🌙 Dark' : '☀️ Light'}
         </button>
         <img src={logo} className="App-logo" alt="logo" />
+        <h1>S&amp;P 500 Stock Ranking Dashboard</h1>
         <p>
-          Edit <code>src/App.js</code> and save to reload.
+          Please search for a company to view ranking and details.
+        </p>
+        <p style={{ color: 'var(--text-secondary)' }}>
+          (No stock is selected by default. The dashboard will update when you search for and select a ticker.)
         </p>
         <p>
           Current theme: <strong>{theme}</strong>
